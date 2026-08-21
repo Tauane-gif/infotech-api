@@ -1,4 +1,4 @@
-export default interface ProdutoDTO {
+  export default interface ProdutoDTO {
     id_produto: number;
     codigo: string;
     nome: string;
