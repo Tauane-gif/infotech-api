@@ -9,7 +9,7 @@
     ativo: boolean;
     data_cadastro: Date;
     categoria: {
-        id_categoria: number;
-        nome: string;
+    id_categoria: number;
+    nome: string;
     };
 }
