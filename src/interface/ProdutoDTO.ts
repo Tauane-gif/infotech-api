@@ -1,6 +1,5 @@
   export default interface ProdutoDTO {
     id_produto: number;
-    codigo: string;
     nome: string;
     descricao: string;
     preco_unitario: number;

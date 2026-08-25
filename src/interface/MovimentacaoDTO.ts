@@ -2,11 +2,12 @@ export default interface MovimentacaoDTO {
     id_movimentacao: number;
     id_produto: number;
     id_movimentacao_origem: number;
-    tipo: string;
+    tipo_movimentacao: string;
     motivo: string;
     quantidade: number;
     preco_unitario: number;
     valor_total: number;
     observacao: string;
     data_movimentacao: Date;
+
 }
