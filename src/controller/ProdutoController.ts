@@ -98,15 +98,15 @@ class ProdutoController {
                 });
             }
 
-            const produto = await Produto.cadastrarProduto({
-                id_categoria: Number(id_categoria),
-                codigo: codigo.trim(),
-                nome: nome.trim(),
-                descricao: descricao ? descricao.trim() : null,
-                preco_unitario: Number(preco_unitario),
-                quantidade_disponivel: Number(quantidade_disponivel),
-                quantidade_minima: Number(quantidade_minima)
-            });
+            const produto = await Produto.cadastrarProduto(
+            Number(id_categoria),
+            codigo.trim(),
+            nome.trim(),
+            descricao ? descricao.trim() : null,
+            Number(preco_unitario),
+            Number(quantidade_disponivel),
+            Number(quantidade_minima)
+       );
 
             return res.status(201).json(produto);
         } catch (erro) {
