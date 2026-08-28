@@ -1,4 +1,4 @@
-import type ProdutoDTO from "../interface/ProdutoDTO.js"
+import type { ProdutoDTO } from "../interface/ProdutoDTO.js";
 import { DatabaseModel } from "./DataBaseModel.js";
 
 const database = new DatabaseModel().pool;
@@ -153,6 +153,7 @@ class Produto {
     private static toDTO(linha: any): ProdutoDTO {
         return {
             id_produto: linha.id_produto,
+            id_categoria: linha.id_categoria,
             codigo: linha.codigo,
             nome: linha.nome,
             descricao: linha.descricao,
@@ -269,8 +270,68 @@ class Produto {
 
 
 
-    static async cadastrarProduto(produto: Produto): Promise<boolean> {
+    static async buscarProduto(id_produto: number): Promise<ProdutoDTO> {
+        return Produto.listarProduto(id_produto);
+    }
+
+    static async listarProdutosReposicao(): Promise<ProdutoDTO[]> {
         try {
+            const querySelectProduto = `
+                SELECT
+                    p.id_produto,
+                    p.id_categoria,
+                    p.codigo,
+                    p.nome,
+                    p.descricao,
+                    p.preco_unitario,
+                    p.quantidade_disponivel,
+                    p.quantidade_minima,
+                    p.ativo,
+                    p.data_cadastro,
+
+                    c.nome AS nome_categoria
+
+                FROM Produto p
+
+                JOIN Categoria c
+                    ON p.id_categoria = c.id_categoria
+
+                WHERE p.ativo = TRUE
+                  AND p.quantidade_disponivel <= p.quantidade_minima
+
+                ORDER BY p.nome ASC;
+            `;
+
+            const respostaBD = await database.query(querySelectProduto);
+
+            return respostaBD.rows.map(Produto.toDTO);
+        } catch (error) {
+            console.error(
+                `[ProdutoModel] Erro ao listar produtos para reposição:`,
+                error
+            );
+
+            throw error;
+        }
+    }
+
+    static async cadastrarProduto(produto: {
+        id_categoria: number;
+        codigo: string;
+        nome: string;
+        descricao?: string | null;
+        preco_unitario: number;
+        quantidade_disponivel: number;
+        quantidade_minima: number;
+        ativo?: boolean;
+        data_cadastro?: Date;
+    }): Promise<boolean> {
+        try {
+            const dados = {
+                ...produto,
+                ativo: produto.ativo ?? true,
+                data_cadastro: produto.data_cadastro ?? new Date()
+            };
 
             const queryInsertProduto = `
                 INSERT INTO Produto (
@@ -301,15 +362,15 @@ class Produto {
             `;
 
             const valores = [
-                produto.id_categoria,
-                produto.codigo,
-                produto.nome,
-                produto.descricao,
-                produto.preco_unitario,
-                produto.quantidade_disponivel,
-                produto.quantidade_minima,
-                produto.ativo,
-                produto.data_cadastro
+                dados.id_categoria,
+                dados.codigo,
+                dados.nome,
+                dados.descricao ?? null,
+                dados.preco_unitario,
+                dados.quantidade_disponivel,
+                dados.quantidade_minima,
+                dados.ativo,
+                dados.data_cadastro
             ];
 
             const resultado = await database.query(

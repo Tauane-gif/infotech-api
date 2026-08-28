@@ -2,187 +2,132 @@ import type { Request, Response } from "express";
 import Produto from "../Model/Produto.js";
 
 class ProdutoController {
-
-
-
-    static async todos(req: Request, res: Response): Promise<Response> {
-
+    static async listarProdutos(req: Request, res: Response) {
         try {
+            const produtos = await Produto.listarProdutos();
 
-            const listaProdutos = await Produto.listarProdutos();
-
-            return res.status(200).json(listaProdutos);
-
-        } catch (error) {
-
-            console.error(
-                `Erro ao consultar produtos. ${error}`
-            );
+            return res.status(200).json(produtos);
+        } catch (erro) {
+            console.error(erro);
 
             return res.status(500).json({
-                mensagem: "Não foi possível acessar a lista de produtos."
+                mensagem: "Erro ao listar produtos"
             });
         }
     }
 
-
-
-    static async um(req: Request, res: Response): Promise<Response> {
-
+    static async buscarProduto(req: Request, res: Response) {
         try {
+            const id = Number(req.params.id);
 
-            const id_produto = Number(req.params.id);
+            if (isNaN(id)) {
+                return res.status(400).json({
+                    mensagem: "ID do produto inválido"
+                });
+            }
 
-            const produto = await Produto.listarProduto(id_produto);
+            const produto = await Produto.buscarProduto(id);
+
+            if (!produto) {
+                return res.status(404).json({
+                    mensagem: "Produto não encontrado"
+                });
+            }
 
             return res.status(200).json(produto);
-
-        } catch (error) {
-
-            console.error(
-                `Erro ao consultar produto. ${error}`
-            );
-
-            if (
-                error instanceof Error &&
-                error.message.includes("não encontrado")
-            ) {
-
-                return res.status(404).json({
-                    mensagem: error.message
-                });
-            }
+        } catch (erro) {
+            console.error(erro);
 
             return res.status(500).json({
-                mensagem: "Não foi possível consultar o produto."
+                mensagem: "Erro ao buscar produto"
             });
         }
     }
 
-
-
-    static async criar(req: Request, res: Response): Promise<Response> {
-
+    static async cadastrarProduto(req: Request, res: Response) {
         try {
+            const {
+                id_categoria,
+                codigo,
+                nome,
+                descricao,
+                preco_unitario,
+                quantidade_disponivel,
+                quantidade_minima
+            } = req.body;
 
-            const dadosRecebidos = req.body;
+            if (!id_categoria) {
+                return res.status(400).json({
+                    mensagem: "A categoria é obrigatória"
+                });
+            }
 
-            const produto = new Produto(
-                dadosRecebidos.id_categoria,
-                dadosRecebidos.codigo,
-                dadosRecebidos.nome,
-                dadosRecebidos.descricao,
-                dadosRecebidos.preco_unitario,
-                dadosRecebidos.quantidade_disponivel,
-                dadosRecebidos.quantidade_minima,
-                dadosRecebidos.ativo
-            );
+            if (!codigo || codigo.trim() === "") {
+                return res.status(400).json({
+                    mensagem: "O código é obrigatório"
+                });
+            }
 
-            await Produto.cadastrarProduto(produto);
+            if (!nome || nome.trim() === "") {
+                return res.status(400).json({
+                    mensagem: "O nome é obrigatório"
+                });
+            }
 
-            return res.status(201).json({
-                mensagem: "Produto cadastrado com sucesso."
+            if (preco_unitario === undefined || preco_unitario === null) {
+                return res.status(400).json({
+                    mensagem: "O preço unitário é obrigatório"
+                });
+            }
+
+            if (Number(preco_unitario) < 0) {
+                return res.status(400).json({
+                    mensagem: "O preço unitário não pode ser negativo"
+                });
+            }
+
+            if (Number(quantidade_disponivel) < 0) {
+                return res.status(400).json({
+                    mensagem: "A quantidade disponível não pode ser negativa"
+                });
+            }
+
+            if (Number(quantidade_minima) < 0) {
+                return res.status(400).json({
+                    mensagem: "A quantidade mínima não pode ser negativa"
+                });
+            }
+
+            const produto = await Produto.cadastrarProduto({
+                id_categoria: Number(id_categoria),
+                codigo: codigo.trim(),
+                nome: nome.trim(),
+                descricao: descricao ? descricao.trim() : null,
+                preco_unitario: Number(preco_unitario),
+                quantidade_disponivel: Number(quantidade_disponivel),
+                quantidade_minima: Number(quantidade_minima)
             });
 
-        } catch (error) {
-
-            console.error(
-                `Erro ao cadastrar produto. ${error}`
-            );
+            return res.status(201).json(produto);
+        } catch (erro) {
+            console.error(erro);
 
             return res.status(500).json({
-                mensagem: "Não foi possível cadastrar o produto."
+                mensagem: "Erro ao cadastrar produto"
             });
         }
     }
 
-
-
-    static async atualizar(
-        req: Request,
-        res: Response
-    ): Promise<Response> {
-
+    static async listarProdutosReposicao(req: Request, res: Response) {
         try {
+            const produtos = await Produto.listarProdutosReposicao();
 
-            const id_produto = Number(req.params.id);
-
-            const dadosRecebidos = req.body;
-
-            await Produto.atualizarProduto(
-                id_produto,
-                dadosRecebidos.id_categoria,
-                dadosRecebidos.codigo,
-                dadosRecebidos.nome,
-                dadosRecebidos.descricao,
-                dadosRecebidos.preco_unitario,
-                dadosRecebidos.quantidade_disponivel,
-                dadosRecebidos.quantidade_minima,
-                dadosRecebidos.ativo
-            );
-
-            return res.status(200).json({
-                mensagem: "Produto atualizado com sucesso."
-            });
-
-        } catch (error) {
-
-            console.error(
-                `Erro ao atualizar produto. ${error}`
-            );
-
-            if (
-                error instanceof Error &&
-                error.message.includes("não encontrado")
-            ) {
-
-                return res.status(404).json({
-                    mensagem: error.message
-                });
-            }
+            return res.status(200).json(produtos);
+        } catch (erro) {
+            console.error(erro);
 
             return res.status(500).json({
-                mensagem: "Não foi possível atualizar o produto."
-            });
-        }
-    }
-
-
-
-
-    static async deletar(
-        req: Request,
-        res: Response
-    ): Promise<Response> {
-
-        try {
-
-            const id_produto = Number(req.params.id);
-
-            await Produto.removerProduto(id_produto);
-
-            return res.status(200).json({
-                mensagem: "Produto removido com sucesso."
-            });
-
-        } catch (error) {
-
-            console.error(
-                `Erro ao remover produto. ${error}`
-            );
-
-            if (
-                error instanceof Error &&
-                error.message.includes("não encontrado")
-            ) {
-
-                return res.status(404).json({
-                    mensagem: error.message
-                });
-            }
-
-            return res.status(500).json({
-                mensagem: "Não foi possível remover o produto."
+                mensagem: "Erro ao listar produtos para reposição"
             });
         }
     }

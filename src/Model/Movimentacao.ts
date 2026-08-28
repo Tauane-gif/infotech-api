@@ -12,7 +12,7 @@ class Movimentacao {
   private precoUnitarioPraticado: number;
   private valorTotal: number;
   private observacao?: string;
-  private dataMovimentacao?: Date;
+  private dataMovimentacao: Date;
  
   constructor(
     _idProduto: number,
@@ -33,7 +33,7 @@ class Movimentacao {
     this.valorTotal = _valorTotal;
     this.motivo = _motivo || '';
     this.observacao = _observacao || '';
-    this.dataMovimentacao = _dataMovimentacao;
+    this.dataMovimentacao = _dataMovimentacao ?? new Date();
   }
  
   public getIdMovimentacao(): number {
@@ -100,7 +100,7 @@ class Movimentacao {
   }
  
   public getDataMovimentacao(): Date {
-    return this.dataMovimentacao!;
+    return this.dataMovimentacao;
   }
   public setDataMovimentacao(dataMovimentacao: Date): void {
     this.dataMovimentacao = dataMovimentacao;
