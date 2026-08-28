@@ -1,9 +1,9 @@
 import { DatabaseModel } from "./Model/DataBaseModel.js";
 import { server } from "./server.js";
-
 import dotenv from "dotenv";
 
 dotenv.config();
+
 const port: number = Number(process.env.PORT ?? 3000);
 const host: string = process.env.HOST ?? "localhost";
 
