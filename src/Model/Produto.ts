@@ -1,8 +1,10 @@
-import pool from "../Model/DataBaseModel.js";
+import { DatabaseModel } from "../Model/DataBaseModel.js";
+
+const database = new DatabaseModel().pool;
 
 class Produto {
     static async listarProdutos() {
-        const resultado = await pool.query(`
+        const resultado = await database.query(`
             SELECT
                 id_produto,
                 id_categoria,
@@ -22,7 +24,7 @@ class Produto {
     }
 
     static async buscarProduto(id: number) {
-        const resultado = await pool.query(`
+        const resultado = await database.query(`
             SELECT
                 id_produto,
                 id_categoria,
@@ -50,7 +52,7 @@ class Produto {
         quantidadeDisponivel: number,
         quantidadeMinima: number
     ) {
-        const resultado = await pool.query(`
+        const resultado = await database.query(`
             INSERT INTO produto (
                 id_categoria,
                 codigo,
@@ -76,7 +78,7 @@ class Produto {
     }
 
     static async listarProdutosReposicao() {
-        const resultado = await pool.query(`
+        const resultado = await database.query(`
             SELECT *
             FROM vw_produtos_reposicao
         `);

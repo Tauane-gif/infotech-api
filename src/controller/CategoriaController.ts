@@ -1,4 +1,4 @@
-import Categoria from "../model/Categoria.js";
+import Categoria from "../Model/Categoria.js";
 import { type Request, type Response } from "express";
 import type CategoriaDTO from "../dto/CategoriaDTO.js";
 
