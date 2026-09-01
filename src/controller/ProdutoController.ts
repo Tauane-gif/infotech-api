@@ -131,6 +131,104 @@ class ProdutoController {
             });
         }
     }
+        static async atualizarProduto(req: Request, res: Response) {
+        try {
+            const id = Number(req.params.id);
+
+            if (isNaN(id)) {
+                return res.status(400).json({
+                    mensagem: "ID do produto inválido"
+                });
+            }
+
+            const {
+                id_categoria,
+                codigo,
+                nome,
+                descricao,
+                preco_unitario,
+                quantidade_disponivel,
+                quantidade_minima
+            } = req.body;
+
+            if (!id_categoria) {
+                return res.status(400).json({
+                    mensagem: "A categoria é obrigatória"
+                });
+            }
+
+            if (!codigo || codigo.trim() === "") {
+                return res.status(400).json({
+                    mensagem: "O código é obrigatório"
+                });
+            }
+
+            if (!nome || nome.trim() === "") {
+                return res.status(400).json({
+                    mensagem: "O nome é obrigatório"
+                });
+            }
+
+            const produtoExistente = await Produto.buscarProduto(id);
+
+            if (!produtoExistente) {
+                return res.status(404).json({
+                    mensagem: "Produto não encontrado"
+                });
+            }
+
+            const produto = await Produto.atualizarProduto(
+                id,
+                Number(id_categoria),
+                codigo.trim(),
+                nome.trim(),
+                descricao ? descricao.trim() : null,
+                Number(preco_unitario),
+                Number(quantidade_disponivel),
+                Number(quantidade_minima)
+            );
+
+            return res.status(200).json(produto);
+        } catch (erro) {
+            console.error(erro);
+
+            return res.status(500).json({
+                mensagem: "Erro ao atualizar produto"
+            });
+        }
+    }
+
+    static async removerProduto(req: Request, res: Response) {
+        try {
+            const id = Number(req.params.id);
+
+            if (isNaN(id)) {
+                return res.status(400).json({
+                    mensagem: "ID do produto inválido"
+                });
+            }
+
+            const produtoExistente = await Produto.buscarProduto(id);
+
+            if (!produtoExistente) {
+                return res.status(404).json({
+                    mensagem: "Produto não encontrado"
+                });
+            }
+
+            await Produto.removerProduto(id);
+
+            return res.status(200).json({
+                mensagem: "Produto removido com sucesso"
+            });
+        } catch (erro) {
+            console.error(erro);
+
+            return res.status(500).json({
+                mensagem: "Erro ao remover produto"
+            });
+        }
+    }
 }
 
 export default ProdutoController;
