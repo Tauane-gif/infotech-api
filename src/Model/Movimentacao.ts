@@ -1,8 +1,10 @@
-import pool from "../Model/DataBaseModel.js";
+import { DatabaseModel } from "../Model/DataBaseModel.js";
+
+const database = new DatabaseModel().pool;
 
 class Movimentacao {
     static async listarMovimentacoes() {
-        const resultado = await pool.query(`
+        const resultado = await database.query(`
             SELECT
                 id_movimentacao,
                 id_produto,
@@ -22,7 +24,7 @@ class Movimentacao {
     }
 
     static async buscarMovimentacao(id: number) {
-        const resultado = await pool.query(`
+        const resultado = await database.query(`
             SELECT
                 id_movimentacao,
                 id_produto,
@@ -51,7 +53,7 @@ class Movimentacao {
         valorTotal: number | null,
         observacao: string
     ) {
-        const resultado = pool.query(`
+        const resultado = database.query(`
             INSERT INTO movimentacao (
                 id_produto,
                 id_movimentacao_origem,
