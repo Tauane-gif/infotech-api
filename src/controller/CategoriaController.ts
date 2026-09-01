@@ -1,60 +1,180 @@
-import type { Request, Response } from "express";
-import Categoria from "../Model/Categoria.js";
+import Categoria from "../model/Categoria.js";
+import { type Request, type Response } from "express";
+import type CategoriaDTO from "../dto/CategoriaDTO.js";
 
-class CategoriaController {
-    static async listarCategorias(req: Request, res: Response) {
+class CategoriaController extends Categoria {
+
+    static async todos(
+        req: Request,
+        res: Response
+    ): Promise<Response> {
+
         try {
-            const categorias = await Categoria.listarCategorias();
 
-            return res.status(200).json(categorias);
-        } catch (erro) {
-            console.error(erro);
+            const listaDeCategorias =
+                await Categoria.listarCategorias();
 
-            return res.status(500).json({ mensagem: "Erro ao listar categorias" });
+            return res.status(200).json(listaDeCategorias);
+
+        } catch (error) {
+
+            console.log(`Erro ao acessar método herdado: ${error}`);
+
+            return res.status(500).json(
+                "Erro ao recuperar as categorias."
+            );
         }
     }
 
-    static async buscarCategoria(req: Request, res: Response) {
+    static async categoria(
+        req: Request,
+        res: Response
+    ): Promise<Response> {
+
         try {
-            const id = Number(req.params.id);
 
-            if (isNaN(id)) {
-                return res.status(400).json({ mensagem: "ID da categoria inválido" });
-            }
+            const idCategoria =
+                parseInt(req.params.id as string);
 
-            const categoria = await Categoria.buscarCategoria(id);
+            const categoria =
+                await Categoria.listarCategoria(idCategoria);
 
             if (!categoria) {
-                return res.status(404).json({ mensagem: "Categoria não encontrada" });
+                return res.status(404).json({
+                    mensagem: "Categoria não encontrada."
+                });
             }
 
             return res.status(200).json(categoria);
-        } catch (erro) {
-            console.error(erro);
 
-            return res.status(500).json({ mensagem: "Erro ao buscar categoria" });
+        } catch (error) {
+
+            console.log(`Erro ao acessar categoria: ${error}`);
+
+            return res.status(500).json({
+                mensagem: "Erro ao recuperar a categoria."
+            });
         }
     }
 
-    static async cadastrarCategoria(req: Request, res: Response) {
+    static async cadastrar(
+        req: Request,
+        res: Response
+    ): Promise<Response> {
+
         try {
-            const { nome } = req.body;
 
-            if (!nome || typeof nome !== "string" || nome.trim() === "") {
-                return res.status(400).json({ mensagem: "O nome da categoria é obrigatório" });
+            const dadosRecebidos: CategoriaDTO = req.body;
+
+            const novaCategoria = new Categoria(
+                dadosRecebidos.nome
+            );
+
+            const result =
+                await Categoria.cadastrarCategoria(novaCategoria);
+
+            if (result) {
+
+                return res.status(201).json({
+                    mensagem: "Categoria cadastrada com sucesso."
+                });
+
+            } else {
+
+                return res.status(500).json({
+                    mensagem:
+                        "Não foi possível cadastrar a categoria no banco de dados."
+                });
             }
 
-            const categoria = await Categoria.cadastrarCategoria(nome.trim());
+        } catch (error) {
 
-            return res.status(201).json(categoria);
-        } catch (erro: any) {
-            console.error(erro);
+            console.log(`Erro ao cadastrar categoria: ${error}`);
 
-            if (erro && erro.code === "23505") {
-                return res.status(409).json({ mensagem: "Categoria já existe" });
+            return res.status(500).json({
+                mensagem: "Erro ao cadastrar categoria."
+            });
+        }
+    }
+
+    static async atualizar(
+        req: Request,
+        res: Response
+    ): Promise<Response> {
+
+        try {
+
+            const dadosRecebidos: CategoriaDTO = req.body;
+
+            const categoria = new Categoria(
+                dadosRecebidos.nome
+            );
+
+            categoria.setIdCategoria(
+                parseInt(req.params.id as string)
+            );
+
+            const result =
+                await Categoria.atualizarCategoria(categoria);
+
+            if (result) {
+
+                return res.status(200).json({
+                    mensagem: "Categoria atualizada com sucesso."
+                });
+
+            } else {
+
+                return res.status(500).json({
+                    mensagem:
+                        "Não foi possível atualizar a categoria no banco de dados."
+                });
             }
 
-            return res.status(500).json({ mensagem: "Erro ao cadastrar categoria" });
+        } catch (error) {
+
+            console.log(`Erro ao atualizar categoria: ${error}`);
+
+            return res.status(500).json({
+                mensagem: "Erro ao atualizar categoria."
+            });
+        }
+    }
+
+    static async remover(
+        req: Request,
+        res: Response
+    ): Promise<Response> {
+
+        try {
+
+            const idCategoria =
+                parseInt(req.params.id as string);
+
+            const result =
+                await Categoria.removerCategoria(idCategoria);
+
+            if (result) {
+
+                return res.status(200).json({
+                    mensagem: "Categoria removida com sucesso."
+                });
+
+            } else {
+
+                return res.status(404).json({
+                    mensagem:
+                        "Categoria não encontrada ou possui produtos vinculados."
+                });
+            }
+
+        } catch (error) {
+
+            console.log(`Erro ao remover categoria: ${error}`);
+
+            return res.status(500).json({
+                mensagem: "Erro ao remover categoria."
+            });
         }
     }
 }
