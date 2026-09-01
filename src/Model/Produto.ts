@@ -85,6 +85,52 @@ class Produto {
 
         return resultado.rows;
     }
+
+        static async atualizarProduto(
+        id: number,
+        idCategoria: number,
+        codigo: string,
+        nome: string,
+        descricao: string | null,
+        precoUnitario: number,
+        quantidadeDisponivel: number,
+        quantidadeMinima: number
+    ) {
+        const resultado = await database.query(`
+            UPDATE produto
+            SET
+                id_categoria = $1,
+                codigo = $2,
+                nome = $3,
+                descricao = $4,
+                preco_unitario = $5,
+                quantidade_disponivel = $6,
+                quantidade_minima = $7
+            WHERE id_produto = $8
+            RETURNING *
+        `, [
+            idCategoria,
+            codigo,
+            nome,
+            descricao,
+            precoUnitario,
+            quantidadeDisponivel,
+            quantidadeMinima,
+            id
+        ]);
+
+        return resultado.rows[0];
+    }
+
+    static async removerProduto(id: number) {
+        const resultado = await database.query(`
+            DELETE FROM produto
+            WHERE id_produto = $1
+            RETURNING *
+        `, [id]);
+
+        return resultado.rows[0];
+    }
 }
 
 export default Produto;
